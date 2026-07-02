@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
 
 // ================= ENUMS =================
@@ -58,14 +58,17 @@ enum AdminRole {
 
 // ================= MODELOS =================
 
-// id = auth.users.id do Supabase Auth (a senha em si vive no Supabase, não aqui)
+// Modo local/dev: login e senha vivem aqui (passwordHash). Em produção, migrar
+// para Supabase Auth (id passa a ser o auth.users.id, remove-se passwordHash).
 model AdminProfile {
-  id         String   @id
-  name       String
-  role       AdminRole @default(ADMIN)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(ADMIN)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   properties Property[] @relation("PropertyCreatedBy")
 
@@ -105,20 +108,20 @@ model Property {
   status      StatusImovel @default(DISPONIVEL)
 
   // preco
-  priceSale Decimal? @db.Decimal(12, 2)
-  priceRent Decimal? @db.Decimal(12, 2)
-  condoFee  Decimal? @db.Decimal(12, 2)
-  iptuValue Decimal? @db.Decimal(12, 2)
+  priceSale Decimal?
+  priceRent Decimal?
+  condoFee  Decimal?
+  iptuValue Decimal?
   showPrice Boolean  @default(true)
-  sortPrice Decimal? @db.Decimal(12, 2)
+  sortPrice Decimal?
 
   // caracteristicas
   bedrooms     Int      @default(0)
   suites       Int      @default(0)
   bathrooms    Int      @default(0)
   parkingSpots Int      @default(0)
-  areaTotal    Decimal? @db.Decimal(10, 2)
-  areaUsable   Decimal? @db.Decimal(10, 2)
+  areaTotal    Decimal?
+  areaUsable   Decimal?
 
   // endereco
   addressStreet     String
@@ -126,10 +129,10 @@ model Property {
   addressComplement String?
   neighborhood       String
   city               String
-  state               String  @db.Char(2)
+  state               String 
   zipCode             String
-  latitude            Decimal? @db.Decimal(10, 7)
-  longitude           Decimal? @db.Decimal(10, 7)
+  latitude            Decimal?
+  longitude           Decimal?
 
   featured   Boolean @default(false)
   viewsCount Int     @default(0)

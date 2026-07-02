@@ -42,3 +42,10 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# local sqlite dev database
+/dev.db
+/dev.db-journal
+
+# locally uploaded property/site images (dev mode storage)
+/public/uploads
