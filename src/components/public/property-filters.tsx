@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 
 import type { CatalogFilters } from "@/lib/queries/properties";
@@ -168,7 +169,7 @@ function FilterFields({
         <Button type="submit" className="flex-1">
           Filtrar
         </Button>
-        <Button type="reset" variant="outline" render={<a href="/imoveis" />}>
+        <Button variant="outline" render={<Link href="/imoveis" />}>
           Limpar
         </Button>
       </div>
