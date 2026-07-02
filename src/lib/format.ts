@@ -10,9 +10,9 @@ export function slugify(input: string) {
     .replace(/^-|-$/g, "");
 }
 
-export function formatCurrency(value: number | string | null | undefined) {
+export function formatCurrency(value: unknown) {
   if (value === null || value === undefined) return null;
-  const numeric = typeof value === "string" ? Number(value) : value;
+  const numeric = Number(value);
   if (Number.isNaN(numeric)) return null;
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -21,9 +21,9 @@ export function formatCurrency(value: number | string | null | undefined) {
   }).format(numeric);
 }
 
-export function formatArea(value: number | string | null | undefined) {
+export function formatArea(value: unknown) {
   if (value === null || value === undefined) return null;
-  const numeric = typeof value === "string" ? Number(value) : value;
+  const numeric = Number(value);
   if (Number.isNaN(numeric)) return null;
   return `${new Intl.NumberFormat("pt-BR").format(numeric)} m²`;
 }
