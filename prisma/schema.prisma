@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================= ENUMS =================
+
+enum TipoNegocio {
+  VENDA
+  ALUGUEL
+}
+
+enum TipoImovel {
+  APARTAMENTO
+  CASA
+  CASA_CONDOMINIO
+  COBERTURA
+  KITNET_STUDIO
+  TERRENO_LOTE
+  SALA_COMERCIAL
+  GALPAO
+  CHACARA_SITIO_FAZENDA
+  OUTRO
+}
+
+enum StatusImovel {
+  DISPONIVEL
+  RESERVADO
+  VENDIDO
+  ALUGADO
+  INATIVO
+}
+
+enum StatusLead {
+  NOVO
+  EM_CONTATO
+  VISITA_AGENDADA
+  FECHADO
+  PERDIDO
+}
+
+enum OrigemLead {
+  PAGINA_IMOVEL
+  PAGINA_CONTATO
+}
+
+enum AdminRole {
+  ADMIN
+  SUPERADMIN
+}
+
+// ================= MODELOS =================
+
+// id = auth.users.id do Supabase Auth (a senha em si vive no Supabase, não aqui)
+model AdminProfile {
+  id         String   @id
+  name       String
+  role       AdminRole @default(ADMIN)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  properties Property[] @relation("PropertyCreatedBy")
+
+  @@map("admin_profiles")
+}
+
+// Singleton: sempre id = 1. Fonte de tudo que seria hardcoded (nome/logo/contato).
+model SiteSettings {
+  id             Int      @id @default(1)
+  siteName       String
+  logoUrl        String?
+  faviconUrl     String?
+  primaryColor   String?
+  secondaryColor String?
+  aboutText      String?
+  heroImageUrl   String?
+  creci          String?
+  contactEmail   String?
+  contactPhone   String?
+  whatsappNumber String?
+  addressLine    String?
+  instagramUrl   String?
+  facebookUrl    String?
+  youtubeUrl     String?
+  updatedAt      DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model Property {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  description String
+  tipoNegocio TipoNegocio
+  tipoImovel  TipoImovel
+  status      StatusImovel @default(DISPONIVEL)
+
+  // preco
+  priceSale Decimal? @db.Decimal(12, 2)
+  priceRent Decimal? @db.Decimal(12, 2)
+  condoFee  Decimal? @db.Decimal(12, 2)
+  iptuValue Decimal? @db.Decimal(12, 2)
+  showPrice Boolean  @default(true)
+  sortPrice Decimal? @db.Decimal(12, 2)
+
+  // caracteristicas
+  bedrooms     Int      @default(0)
+  suites       Int      @default(0)
+  bathrooms    Int      @default(0)
+  parkingSpots Int      @default(0)
+  areaTotal    Decimal? @db.Decimal(10, 2)
+  areaUsable   Decimal? @db.Decimal(10, 2)
+
+  // endereco
+  addressStreet     String
+  addressNumber     String?
+  addressComplement String?
+  neighborhood       String
+  city               String
+  state               String  @db.Char(2)
+  zipCode             String
+  latitude            Decimal? @db.Decimal(10, 7)
+  longitude           Decimal? @db.Decimal(10, 7)
+
+  featured   Boolean @default(false)
+  viewsCount Int     @default(0)
+
+  createdById String?
+  createdBy   AdminProfile? @relation("PropertyCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  images PropertyImage[]
+  leads  Lead[]
+
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status, tipoNegocio, tipoImovel])
+  @@index([city, neighborhood])
+  @@index([sortPrice])
+  @@map("properties")
+}
+
+model PropertyImage {
+  id          String   @id @default(cuid())
+  propertyId  String
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url         String
+  storagePath String
+  order       Int      @default(0)
+  isCover     Boolean  @default(false)
+  altText     String?
+  createdAt   DateTime @default(now())
+
+  @@index([propertyId, order])
+  @@map("property_images")
+}
+
+model Lead {
+  id            String     @id @default(cuid())
+  propertyId    String?
+  property      Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  name          String
+  email         String
+  phone         String
+  message       String
+  status        StatusLead @default(NOVO)
+  origem        OrigemLead @default(PAGINA_IMOVEL)
+  internalNotes String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([status])
+  @@index([propertyId])
+  @@map("leads")
+}
