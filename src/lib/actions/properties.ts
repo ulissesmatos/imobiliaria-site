@@ -72,6 +72,8 @@ export async function createProperty(
   });
 
   revalidatePath("/admin/imoveis");
+  revalidatePath("/");
+  revalidatePath("/imoveis");
   redirect(`/admin/imoveis/${property.id}/editar`);
 }
 
@@ -107,6 +109,9 @@ export async function updateProperty(
 
   revalidatePath("/admin/imoveis");
   revalidatePath(`/admin/imoveis/${id}/editar`);
+  revalidatePath("/");
+  revalidatePath("/imoveis");
+  revalidatePath("/imoveis/[slug]", "page");
   return {};
 }
 
@@ -117,6 +122,9 @@ export async function updatePropertyStatus(id: string, status: string) {
     data: { status: status as never },
   });
   revalidatePath("/admin/imoveis");
+  revalidatePath("/");
+  revalidatePath("/imoveis");
+  revalidatePath("/imoveis/[slug]", "page");
 }
 
 export async function toggleFeatured(id: string, featured: boolean) {
@@ -126,6 +134,7 @@ export async function toggleFeatured(id: string, featured: boolean) {
     data: { featured },
   });
   revalidatePath("/admin/imoveis");
+  revalidatePath("/");
 }
 
 export async function deleteProperty(id: string) {
@@ -144,4 +153,7 @@ export async function deleteProperty(id: string) {
 
   await prisma.property.delete({ where: { id } });
   revalidatePath("/admin/imoveis");
+  revalidatePath("/");
+  revalidatePath("/imoveis");
+  revalidatePath("/imoveis/[slug]", "page");
 }

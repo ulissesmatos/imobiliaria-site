@@ -8,6 +8,10 @@ import { deleteStoredFile, savePropertyImage } from "@/lib/storage/supabase";
 
 function revalidatePropertyEdit(propertyId: string) {
   revalidatePath(`/admin/imoveis/${propertyId}/editar`);
+  revalidatePath("/admin/imoveis");
+  revalidatePath("/");
+  revalidatePath("/imoveis");
+  revalidatePath("/imoveis/[slug]", "page");
 }
 
 export async function uploadPropertyImage(propertyId: string, file: File) {
