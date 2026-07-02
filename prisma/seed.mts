@@ -10,6 +10,43 @@ const adapter = new PrismaBetterSqlite3({
 });
 const prisma = new PrismaClient({ adapter });
 
+const generatedHeroImageUrl = "/uploads/generated/hero-home.webp";
+
+type GeneratedPropertyImage = {
+  name: string;
+  altText: string;
+};
+
+const generatedPropertyImages: Record<string, GeneratedPropertyImage[]> = {
+  "apartamento-3-quartos-jardim-america-sao-paulo": [
+    { name: "apartamento-jardim-america-1", altText: "Sala de estar integrada com janela ampla." },
+    { name: "apartamento-jardim-america-2", altText: "Sala de estar com iluminação natural." },
+    { name: "apartamento-jardim-america-3", altText: "Ambiente integrado com sofá e decoração moderna." },
+    { name: "apartamento-jardim-america-4", altText: "Sala de estar com almofadas e acabamento clean." },
+  ],
+  "casa-2-quartos-vila-madalena-sao-paulo": [
+    { name: "casa-vila-madalena-1", altText: "Fachada de casa moderna." },
+    { name: "casa-vila-madalena-2", altText: "Vista externa da casa." },
+    { name: "casa-vila-madalena-3", altText: "Fachada com detalhes em madeira." },
+    { name: "casa-vila-madalena-4", altText: "Área externa da residência." },
+  ],
+  "cobertura-vista-mar-copacabana-rio-de-janeiro": [
+    { name: "cobertura-copacabana-1", altText: "Vista panorâmica para o mar." },
+    { name: "cobertura-copacabana-2", altText: "Ambiente com vista para o mar." },
+    { name: "cobertura-copacabana-3", altText: "Quarto com vista para o mar ao entardecer." },
+    { name: "cobertura-copacabana-4", altText: "Varanda com vista para o mar." },
+  ],
+  "kitnet-mobiliada-centro-campinas": [
+    { name: "kitnet-campinas-1", altText: "Kitnet mobiliada com cozinha integrada." },
+    { name: "kitnet-campinas-2", altText: "Ambiente compacto e funcional." },
+    { name: "kitnet-campinas-3", altText: "Quarto com cama e mesa de trabalho." },
+  ],
+  "terreno-praia-grande-santos": [
+    { name: "terreno-santos-1", altText: "Terreno gramado plano." },
+    { name: "terreno-santos-2", altText: "Vista geral do terreno." },
+  ],
+};
+
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL ?? "admin@imobiliaria.local";
   const password = process.env.SEED_ADMIN_PASSWORD ?? "admin123";
@@ -25,7 +62,7 @@ async function main() {
     },
   });
 
-  await prisma.siteSettings.upsert({
+  const settings = await prisma.siteSettings.upsert({
     where: { id: 1 },
     update: {},
     create: {
@@ -34,8 +71,16 @@ async function main() {
       contactEmail: email,
       aboutText:
         "Edite essas informações em Configurações no painel administrativo.",
+      heroImageUrl: generatedHeroImageUrl,
     },
   });
+
+  if (!settings.heroImageUrl) {
+    await prisma.siteSettings.update({
+      where: { id: 1 },
+      data: { heroImageUrl: generatedHeroImageUrl },
+    });
+  }
 
   const sampleProperties = [
     {
@@ -176,7 +221,7 @@ async function main() {
   ];
 
   for (const property of sampleProperties) {
-    await prisma.property.upsert({
+    const savedProperty = await prisma.property.upsert({
       where: { slug: property.slug },
       update: {},
       create: {
@@ -185,6 +230,30 @@ async function main() {
         publishedAt: new Date(),
       },
     });
+
+    const images = generatedPropertyImages[property.slug] ?? [];
+
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      const storagePath = `uploads/generated/${image.name}.webp`;
+
+      const existingImage = await prisma.propertyImage.findFirst({
+        where: { propertyId: savedProperty.id, storagePath },
+      });
+
+      if (!existingImage) {
+        await prisma.propertyImage.create({
+          data: {
+            propertyId: savedProperty.id,
+            url: `/${storagePath}`,
+            storagePath,
+            order: i,
+            isCover: i === 0,
+            altText: image.altText,
+          },
+        });
+      }
+    }
   }
 
   console.log("Seed concluído.");

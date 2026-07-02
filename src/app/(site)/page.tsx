@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Building2 } from "lucide-react";
 
 import { prisma } from "@/lib/prisma";
 import { getFeaturedProperties } from "@/lib/queries/properties";
 import { PropertyCard } from "@/components/public/property-card";
 import { Button } from "@/components/ui/button";
+
+const fallbackHeroImageUrl = "/uploads/generated/hero-home.webp";
 
 export default async function HomePage() {
   const [settings, featured] = await Promise.all([
@@ -13,28 +14,23 @@ export default async function HomePage() {
   ]);
 
   const siteName = settings?.siteName ?? "Sua Imobiliária";
+  const heroImageUrl = settings?.heroImageUrl || fallbackHeroImageUrl;
 
   return (
     <div>
       <section className="relative flex min-h-[420px] items-center justify-center overflow-hidden bg-muted">
-        {settings?.heroImageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={settings.heroImageUrl}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10">
-            <Building2 className="size-24 text-muted-foreground/20" strokeWidth={1} />
-          </div>
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={heroImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
         <div className="absolute inset-0 bg-black/40" />
-        <div className="relative z-10 flex flex-col items-center gap-6 px-6 text-center text-white">
-          <h1 className="max-w-xl text-3xl font-semibold tracking-tight sm:text-4xl">
+        <div className="relative z-10 flex w-full flex-col items-center gap-6 px-6 text-center text-white">
+          <h1 className="max-w-xs text-2xl font-semibold tracking-tight sm:max-w-xl sm:text-4xl">
             Encontre o imóvel ideal com a {siteName}
           </h1>
-          <p className="max-w-md text-white/90">
+          <p className="max-w-xs text-sm text-white/90 sm:max-w-md sm:text-base">
             {settings?.aboutText ??
               "Imóveis selecionados para compra e aluguel, com atendimento próximo do início ao fim."}
           </p>

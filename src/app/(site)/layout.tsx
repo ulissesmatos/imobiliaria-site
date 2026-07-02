@@ -18,8 +18,8 @@ export default async function SiteLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-background">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
+        <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-4 sm:flex-nowrap sm:px-6">
+          <Link href="/" className="flex min-w-0 items-center gap-2 font-semibold">
             {settings?.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={settings.logoUrl} alt={siteName} className="h-8 object-contain" />
@@ -28,7 +28,7 @@ export default async function SiteLayout({
             )}
             {siteName}
           </Link>
-          <nav className="flex items-center gap-6 text-sm font-medium text-muted-foreground">
+          <nav className="grid w-full min-w-0 basis-full grid-cols-2 items-center gap-2 text-center text-sm font-medium text-muted-foreground sm:flex sm:w-auto sm:basis-auto sm:justify-start sm:gap-6 sm:text-left">
             <Link href="/" className="hover:text-foreground">
               Início
             </Link>

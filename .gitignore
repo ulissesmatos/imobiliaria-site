@@ -48,4 +48,6 @@ next-env.d.ts
 /dev.db-journal
 
 # locally uploaded property/site images (dev mode storage)
-/public/uploads
+/public/uploads/*
+!/public/uploads/generated/
+!/public/uploads/generated/**
