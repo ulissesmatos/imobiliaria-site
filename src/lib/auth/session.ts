@@ -1,39 +1,31 @@
 import "server-only";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import {
-  SESSION_COOKIE,
-  SESSION_DURATION_SECONDS,
-  decryptSession,
-  encryptSession,
-  type SessionPayload,
-} from "@/lib/auth/jwt";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
-export type { SessionPayload };
+export type SessionPayload = {
+  adminId: string;
+  email: string;
+  name: string;
+};
 
-export async function createSession(payload: SessionPayload) {
-  const token = await encryptSession(payload);
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_DURATION_SECONDS,
+export async function getSession(): Promise<SessionPayload | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const profile = await prisma.adminProfile.findUnique({
+    where: { id: user.id },
   });
-}
 
-export async function getSession() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  return decryptSession(token);
-}
+  if (!profile || !profile.isActive) return null;
 
-export async function destroySession() {
-  const cookieStore = await cookies();
-  cookieStore.delete(SESSION_COOKIE);
+  return { adminId: profile.id, email: profile.email, name: profile.name };
 }
 
 export async function requireSession() {

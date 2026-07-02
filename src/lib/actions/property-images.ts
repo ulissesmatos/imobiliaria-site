@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { deleteStoredFile, savePropertyImage } from "@/lib/storage/local";
+import { deleteStoredFile, savePropertyImage } from "@/lib/storage/supabase";
 
 function revalidatePropertyEdit(propertyId: string) {
   revalidatePath(`/admin/imoveis/${propertyId}/editar`);

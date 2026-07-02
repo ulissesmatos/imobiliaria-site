@@ -2,9 +2,7 @@
 
 import { redirect } from "next/navigation";
 
-import { verifyPassword } from "@/lib/auth/password";
-import { createSession, destroySession } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { loginSchema } from "@/lib/validations/auth";
 
 export type LoginState = {
@@ -24,33 +22,21 @@ export async function signIn(
     return { error: "E-mail ou senha inválidos." };
   }
 
-  const admin = await prisma.adminProfile.findUnique({
-    where: { email: parsed.data.email.toLowerCase() },
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
   });
 
-  if (!admin || !admin.isActive) {
+  if (error) {
     return { error: "E-mail ou senha incorretos." };
   }
-
-  const passwordMatches = await verifyPassword(
-    parsed.data.password,
-    admin.passwordHash
-  );
-
-  if (!passwordMatches) {
-    return { error: "E-mail ou senha incorretos." };
-  }
-
-  await createSession({
-    adminId: admin.id,
-    email: admin.email,
-    name: admin.name,
-  });
 
   redirect("/admin");
 }
 
 export async function signOut() {
-  await destroySession();
+  const supabase = await createClient();
+  await supabase.auth.signOut();
   redirect("/admin/login");
 }

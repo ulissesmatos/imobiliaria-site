@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireSession } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { saveSiteAsset } from "@/lib/storage/local";
+import { saveSiteAsset } from "@/lib/storage/supabase";
 import { siteSettingsSchema } from "@/lib/validations/site-settings";
 
 export type SiteSettingsFormState = {

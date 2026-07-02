@@ -1,14 +1,34 @@
 import "dotenv/config";
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { createClient } from "@supabase/supabase-js";
 
 import { PrismaClient } from "../src/generated/prisma/client";
-import { hashPassword } from "../src/lib/auth/password";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const adapter = new PrismaPg(process.env.DATABASE_URL as string);
 const prisma = new PrismaClient({ adapter });
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+  process.env.SUPABASE_SERVICE_ROLE_KEY as string,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+);
+
+async function ensureAdminAuthUser(email: string, password: string) {
+  const { data: existing } = await supabase.auth.admin.listUsers();
+  const found = existing?.users.find((u) => u.email === email);
+  if (found) return found;
+
+  const { data, error } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+  if (error || !data.user) {
+    throw new Error(`Falha ao criar usuário no Supabase Auth: ${error?.message}`);
+  }
+  return data.user;
+}
 
 const generatedHeroImageUrl = "/uploads/generated/hero-home.webp";
 
@@ -51,12 +71,14 @@ async function main() {
   const email = process.env.SEED_ADMIN_EMAIL ?? "admin@imobiliaria.local";
   const password = process.env.SEED_ADMIN_PASSWORD ?? "admin123";
 
+  const authUser = await ensureAdminAuthUser(email, password);
+
   const admin = await prisma.adminProfile.upsert({
-    where: { email },
-    update: {},
+    where: { id: authUser.id },
+    update: { email },
     create: {
+      id: authUser.id,
       email,
-      passwordHash: await hashPassword(password),
       name: "Administrador",
       role: "SUPERADMIN",
     },

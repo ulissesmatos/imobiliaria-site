@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireSession } from "@/lib/auth/session";
 import { slugify } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
-import { deleteStoredFile } from "@/lib/storage/local";
+import { deleteStoredFile } from "@/lib/storage/supabase";
 import { propertySchema } from "@/lib/validations/property";
 
 export type PropertyFormState = {

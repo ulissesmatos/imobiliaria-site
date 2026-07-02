@@ -8,7 +8,10 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // migrate/introspect usam conexão direta (não o pooler), que suporta os
+  // locks de sessão que o motor de migration precisa. O app em runtime usa
+  // o DATABASE_URL (pooled) via adapter, configurado em src/lib/prisma.ts.
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DIRECT_URL"],
   },
 });
