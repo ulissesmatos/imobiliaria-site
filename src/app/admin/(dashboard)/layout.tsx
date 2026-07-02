@@ -21,8 +21,8 @@ export default async function AdminDashboardLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-background px-6 py-3">
-        <div className="flex items-center justify-between">
+      <header className="border-b bg-background px-6 py-3 sm:px-8">
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Building2 className="size-5" strokeWidth={1.5} />
             Painel Administrativo
@@ -40,7 +40,7 @@ export default async function AdminDashboardLayout({
             </form>
           </div>
         </div>
-        <nav className="mt-3 flex gap-4 text-sm text-muted-foreground">
+        <nav className="mx-auto mt-3 flex max-w-6xl gap-4 text-sm text-muted-foreground">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-foreground">
               {link.label}
@@ -48,7 +48,9 @@ export default async function AdminDashboardLayout({
           ))}
         </nav>
       </header>
-      <main className="flex-1 bg-muted/30 p-6">{children}</main>
+      <main className="flex-1 bg-muted/30 px-6 py-6 sm:px-8">
+        <div className="mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }
