@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 
 import { createLead, type LeadFormState } from "@/lib/actions/leads";
@@ -94,6 +95,14 @@ export function ContactForm({
       <Button type="submit" className="w-full" disabled={isPending}>
         {isPending ? "Enviando..." : "Enviar mensagem"}
       </Button>
+
+      <p className="text-center text-xs text-muted-foreground">
+        Ao enviar, você concorda com a nossa{" "}
+        <Link href="/politica-privacidade" className="underline">
+          Política de Privacidade
+        </Link>
+        .
+      </p>
     </form>
   );
 }
