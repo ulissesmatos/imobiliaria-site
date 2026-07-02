@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import {
   SESSION_COOKIE,
@@ -33,4 +34,12 @@ export async function getSession() {
 export async function destroySession() {
   const cookieStore = await cookies();
   cookieStore.delete(SESSION_COOKIE);
+}
+
+export async function requireSession() {
+  const session = await getSession();
+  if (!session) {
+    redirect("/admin/login");
+  }
+  return session;
 }
